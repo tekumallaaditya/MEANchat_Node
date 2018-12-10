@@ -54,8 +54,27 @@ io.on('connection', function(socket){
     });
 
     socket.on('send message', function(data){
-        console.log('received a message from ->' + data.user + 'message is ->' + data.msg);
-        io.sockets.emit('chat message', {user: data.user, msg: data.msg});
+        console.log('received a message from ->' + data.user + 'message is ->' + data.msg, Object.keys(users)) ;
+        var chatMessage = data.msg.trim();
+        if (chatMessage.substr(0,1) == '@'){
+            var ind = chatMessage.indexOf(' ');
+            var targetUser = chatMessage.substr(1,ind-1);
+            var targetMessage = chatMessage.substr(ind+1);
+            console.log('index of ->' + Object.keys(users).indexOf(targetUser), targetUser)                      
+            
+            if (Object.keys(users).indexOf(targetUser) != -1){
+                console.log('target user found')
+                users[targetUser].emit('chat message', {user: data.user, msg: targetMessage});
+                socket.emit('chat message', {user: data.user, msg: data.msg});
+            } else {
+                console.log('private failed')
+                socket.emit('private failed',{user: data.user, targetUser: targetUser});
+            }
+        }else {
+            console.log('broadcast.. '+ chatMessage.substr(0,1))
+            io.sockets.emit('chat message', {user: data.user, msg: data.msg});
+        }       
+        
     });
 
     socket.on('user left', function(data){
