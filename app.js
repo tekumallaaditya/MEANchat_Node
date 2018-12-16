@@ -4,15 +4,21 @@ var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var cors = require('cors');
 var bodyParser=require('body-parser');
+var path = require('path');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 app.options('*', cors());
 
+app.use(express.static(path.join(__dirname, 'public'))); // for angular build
+app.get('*', function(req, res){
+    res.sendFile(path.join(__dirname, 'public/index.html'));     // for angular build
+})
 
 
-port = process.env.PORT || 8080
+
+port = process.env.PORT || 8080;
 
 
 server.listen(port, function() {
